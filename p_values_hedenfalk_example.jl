@@ -12,7 +12,7 @@ function run_example()
     println("Estimated π₀, irregular: $(H1.weights[end])")
 
     # Count number of observations in leftmost bin
-    println("Number of observations in leftmost bin if irregular histogram $(fit(Histogram, p_values, H1.edges[1]).weights[1])")
+    println("Number of observations in leftmost bin of irregular histogram $(fit(Histogram, p_values, H1.edges[1]).weights[1])")
 
 
     H2, _ = histogram_regular(p_values; a = k->0.5*k, support=(0.0, 1.0))
