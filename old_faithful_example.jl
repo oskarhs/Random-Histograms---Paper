@@ -17,6 +17,7 @@ function run_faithful_example()
     p1 = plot(H1, alpha=0.3, xlabel="Waiting time", ylabel="Density", label="", color="grey", title="Irregular histogram")
     plot!(p1, binned_est[:,1], binned_est[:,2], color="blue", linestyle=:dash, label="", lw=2.0)
     ylims!(p1, 0.0, 0.045)
+    xlims!(p1, 35.0, 110.0)
 
 
     println("Number of observations in second bin of irregular histogram $(fit(Histogram, waiting, H1.edges[1]).weights[2])")
@@ -27,6 +28,7 @@ function run_faithful_example()
     p2 = plot(H2, alpha=0.3, xlabel="Waiting time", ylabel="Density", label="", color="grey", title="Regular histogram")
     plot!(p2, binned_est[:,1], binned_est[:,2], color="blue", linestyle=:dash, label="", lw=2.0)
     ylims!(p2, 0.0, 0.045)
+    xlims!(p2, 35.0, 110.0)
 
     savefig(p1, joinpath("figures", "old_faithful_irregular.pdf"))
     savefig(p2, joinpath("figures", "old_faithful_regular.pdf"))
