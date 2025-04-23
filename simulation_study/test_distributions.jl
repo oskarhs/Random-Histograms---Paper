@@ -47,7 +47,7 @@ function modes(d::Beta)
     end
 end
 function pid_tolerance(d::Beta)
-    return [quantile(d, 0.01)]
+    return [quantile(d, 0.1), quantile(d, 0.9)]
 end
 function modes(d::SymTriangularDist)
     return [params(d)[1]]
