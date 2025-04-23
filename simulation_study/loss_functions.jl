@@ -6,7 +6,7 @@ include("test_distributions.jl")
 
 function hellinger_loss(d::ContinuousUnivariateDistribution, breaks_hist::AbstractVector{<:Real}, dens_hist::AbstractVector{<:Real})
     disc = mergesorted(discontinuities(d), breaks_hist) # union of discontinuities of f₀ and \hat{f} in ascending order
-    # Now perform numerical quadrature piecewise over each continuity interval
+    # Now perform numerical quadrature piecewise over each interval where √f₀-√\hat{f} is continuous
     m = length(disc) - 1
     hell = cdf(d, disc[1]-10*eps())
     for j = 1:m
@@ -26,7 +26,7 @@ end
 function l2_loss(d::ContinuousUnivariateDistribution, breaks_hist::AbstractVector{<:Real}, dens_hist::AbstractVector{<:Real})
     disc = mergesorted(discontinuities(d), breaks_hist)
     supp = support(d)
-    # Now perform numerical quadrature piecewise over each continuity interval
+    # Now perform numerical quadrature piecewise over each interval where f₀-\hat{f} is continuous
     m = length(disc) - 1
     ip = IntegralProblem((t,p) -> pdf(d, t)^2, supp.lb, disc[1]-10*eps())
     l2 = solve(ip, GaussLegendre()).u
