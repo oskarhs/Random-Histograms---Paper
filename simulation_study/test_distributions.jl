@@ -618,7 +618,7 @@ end
 function discontinuities(d::Harp)
     return Float64[]
 end
-function support(d::Claw)
+function support(d::Harp)
     return RealInterval{Float64}(-Inf, Inf)
 end
 

@@ -135,6 +135,6 @@ function estimate_all_risks()
     CSV.write(joinpath("simulations_data", "l2_risks.csv"), df_l2)
 end
 
-#@time estimate_all_risks()
+@time estimate_all_risks()
 
-@time estimate_risk(Xoshiro(1812), Beta(0.5, 0.5), 50, 500; l2=false)
+#@time estimate_risk(Xoshiro(1812), Beta(0.5, 0.5), 50, 500; l2=false)
