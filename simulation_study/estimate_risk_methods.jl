@@ -124,9 +124,6 @@ function estimate_all_risks()
             push!(df_hell, vcat(j, ns[i], risk_hell))
             push!(df_pid, vcat(j, ns[i], risk_pid))
             push!(df_l2, vcat(j, ns[i], risk_l2))
-            #push!(df_hell, vcat(ifelse(i==1, "$j", ""), ns[i], risk_hell))
-            #push!(df_pid, vcat(ifelse(i==1, "$j", ""), ns[i], risk_pid))
-            #push!(df_l2, vcat(ifelse(i==1, "$j", ""), ns[i], risk_l2))
         end
     end
     # Write the data to csv files
