@@ -104,22 +104,27 @@ function generate_lrr_figure(n)
     ]
 
     df_hell = CSV.read(joinpath("simulations_data", "hellinger_risks.csv"), DataFrame)
+    df_pid = CSV.read(joinpath("simulations_data", "pid_risks.csv"), DataFrame)
     df_l2 = CSV.read(joinpath("simulations_data", "l2_risks.csv"), DataFrame)
 
     # Convert some columns to integer
     df_hell[!, :n] = convert.(Int64, df_hell[!, :n])
     df_hell[!, :Density] = convert.(Int64, df_hell[!, :Density])
+    df_pid[!, :n] = convert.(Int64, df_pid[!, :n])
+    df_pid[!, :Density] = convert.(Int64, df_pid[!, :Density])
     df_l2[!, :n] = convert.(Int64, df_l2[!, :n])
     df_l2[!, :Density] = convert.(Int64, df_l2[!, :Density])
 
     # Lazy implementation
     lrr_hell = Array{Float64}(undef, 16, length(methods))
+    r_pid = Array{Float64}(undef, 16, 6)
     lrr_l2 = Array{Float64}(undef, 14, length(methods)) # two densities not in l2
 
     j = 1
     for i in 1:16
         risks_hell = values(df_hell[ind + 5*(i-1),3:end])
         lrr_hell[i,:] .= log.(risks_hell ./ minimum(risks_hell))
+        r_pid[i,:] .=  values(df_pid[ind + 5*(i-1),9:end])
         if in_l2[i]
             risks_l2 = values(df_l2[ind + 5*(i-1),3:end])
             lrr_l2[j,:] .= log.(risks_l2 ./ minimum(risks_l2))
@@ -127,14 +132,19 @@ function generate_lrr_figure(n)
         end
     end
     df_lrr_hell = DataFrame(lrr_hell, methods)
+    df_r_pid = DataFrame(r_pid, methods[7:end])
     df_lrr_l2 = DataFrame(lrr_l2, methods)
     p1 = @df df_lrr_hell boxplot(cols(), legend=false, color="black", fillalpha=0.3)
     plot!(p1, xticks=(1:length(methods), methods), color="black", fillalpha=0.3, ylabel="LRRₙ(f₀, m)", title="Hellinger risk, n = $n")
     p2 = @df df_lrr_l2 boxplot(cols(), legend=false, color="black", fillalpha=0.3)
     plot!(p2, xticks=(1:length(methods), methods), color="black", fillalpha=0.3, ylabel="LRRₙ(f₀, m)", title="L2 risk, n = $n")
+    p3 = @df df_r_pid[:,1:4] boxplot(cols(), legend=false, color="black", fillalpha=0.3)
+    plot!(p3, xticks=(1:4, methods[7:end-2]), color="black", fillalpha=0.3, ylabel="log Rₙ(f₀, m)", title="PID risk, n = $n")
 
     savefig(p1, joinpath("simulations_data", "figures", "lrr_hell_$n.pdf"))
     savefig(p2, joinpath("simulations_data", "figures", "lrr_l2_$n.pdf"))
+    savefig(p3, joinpath("simulations_data", "figures", "r_pid_$n.pdf"))
+
 end
 
 generate_risk_tables()
