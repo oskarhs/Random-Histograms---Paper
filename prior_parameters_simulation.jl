@@ -29,7 +29,7 @@ function compute_risk_a(n, d, rng)
     for j in eachindex(as)
         for b = 1:B
             x = rand(rng, d, n)
-            H, _ = histogram_irregular(x; a = as[j], grid="regular", support=support_d)
+            H = histogram_irregular(x; a = as[j], grid="regular", support=support_d)
             loss[j,b] = hell_loss(H.weights, H.edges[1], d)
             k_opt[j,b] = length(H.weights)
         end
@@ -42,7 +42,7 @@ end
 function compute_risk_k(n, d, rng)
     B = 500
 
-    # Uniform, 1/k and Poisson priors
+    # Uniform, 1/k, 1/k^2 and Poisson priors
     logpriors = [k->0.0, k->-log(k), k->-2.0*log(k), k->-loggamma(k+1)]
     loss = Array{Float64}(undef, length(logpriors), B)
     risk = Array{Float64}(undef, length(logpriors))
@@ -52,7 +52,7 @@ function compute_risk_k(n, d, rng)
     for j in eachindex(logpriors)
         for b = 1:B
             x = rand(rng, d, n)
-            H, _ = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid="regular", support=support_d)
+            H = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid="regular", support=support_d)
             loss[j,b] = hell_loss(H.weights, H.edges[1], d)
         end
         risk[j] = mean(loss[j,:])

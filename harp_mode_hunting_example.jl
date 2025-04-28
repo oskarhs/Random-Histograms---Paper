@@ -12,14 +12,14 @@ function generate_harp_mode_plot()
     d_modes = modes(Harp())
     delta = pid_tolerance(Harp())
 
-    H_reg, _ = histogram_regular(x; rule="bic")
+    H_reg = histogram_regular(x; rule="bic")
     loss_reg, reg_modes, reg_vals, spur_reg = peak_id_loss(d, H_reg.edges[1], H_reg.weights)
     println("PID loss, regular: $loss_reg")
     println("Number of spurious modes, regular: $spur_reg")
 
     println("Hellinger loss, regular: ", round(hellinger_loss(d, collect(H_reg.edges[1]), H_reg.weights); sigdigits=3))
 
-    H_irreg, _ = histogram_irregular(x; rule="bayes", a=1.0)
+    H_irreg = histogram_irregular(x; rule="bayes", a=1.0)
     loss_irreg, irreg_modes, irreg_vals, spur_irreg = peak_id_loss(d, H_irreg.edges[1], H_irreg.weights)
     println("PID loss, irregular: $loss_irreg")
     println("Number of spurious modes, irregular: $spur_irreg")
