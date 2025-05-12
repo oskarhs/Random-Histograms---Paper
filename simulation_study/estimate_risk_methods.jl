@@ -5,6 +5,9 @@ include(joinpath("R_methods", "wand_hist.jl"))
 include(joinpath("R_methods", "RMG_hist.jl"))
 include(joinpath("R_methods", "taut_string.jl"))
 
+# Run this from the simulation_study folder
+# To speed up the code a little, open Julia with multiple threads.
+
 function get_methods()
     return [
         "Wand", "AIC", "BIC", "BR", "Knuth", "SC",
@@ -73,7 +76,7 @@ function estimate_risk(rng, d, n, B; l2=false)
         breaks = collect(H.edges[1])
         loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.weights; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule="bayes", grid="regular")
+        H = histogram_irregular(x; rule="bayes", grid="regular", a = 5.0)
         loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.edges[1], H.weights; l2=l2)
         # RMG-B
         breaks, dens = rmg_hist(x, "penB")
@@ -134,4 +137,4 @@ end
 
 @time estimate_all_risks()
 
-#@time estimate_risk(Xoshiro(1812), Beta(0.5, 0.5), 200, 500; l2=false)
+#@time estimate_risk(Xoshiro(1812), Beta(0.5, 0.5), 1000, 500; l2=false)

@@ -12,7 +12,7 @@ function run_faithful_example()
         """
     )
 
-    H1 = histogram_irregular(waiting; grid="regular")
+    H1 = histogram_irregular(waiting; grid="regular", a=5.0)
     p1 = plot(H1, alpha=0.3, xlabel="Waiting time", ylabel="Density", label="", color="grey", title="Irregular histogram")
     plot!(p1, kernel_est[:,1], kernel_est[:,2], color="blue", linestyle=:dash, label="", lw=2.0)
     ylims!(p1, 0.0, 0.045)

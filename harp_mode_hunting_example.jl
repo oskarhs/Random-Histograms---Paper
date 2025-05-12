@@ -19,7 +19,7 @@ function generate_harp_mode_plot()
 
     println("Hellinger loss, regular: ", round(hellinger_loss(d, collect(H_reg.edges[1]), H_reg.weights); sigdigits=3))
 
-    H_irreg = histogram_irregular(x; rule="bayes", a=1.0)
+    H_irreg = histogram_irregular(x; rule="bayes", a=5.0)
     loss_irreg, irreg_modes, irreg_vals, spur_irreg = peak_id_loss(d, H_irreg.edges[1], H_irreg.weights)
     println("PID loss, irregular: $loss_irreg")
     println("Number of spurious modes, irregular: $spur_irreg")

@@ -20,59 +20,121 @@ function generate_risk_tables()
 
     # First, create all risk tables to be written to file
     colnms = vcat(["Density"], ["n"], methods)
-    df_hell_print = DataFrame([[] for _ = colnms] , colnms)
-    df_pid_print = DataFrame([[] for _ = colnms] , colnms)
-    df_l2_print = DataFrame([[] for _ = colnms] , colnms)
-    for j in 1:16
+    df_hell_print_1 = DataFrame([[] for _ = colnms] , colnms)
+    df_hell_print_2 = DataFrame([[] for _ = colnms] , colnms)
+
+    df_pid_print_1 = DataFrame([[] for _ = colnms] , colnms)
+    df_pid_print_2 = DataFrame([[] for _ = colnms] , colnms)
+
+    df_l2_print_1 = DataFrame([[] for _ = colnms] , colnms)
+    df_l2_print_2 = DataFrame([[] for _ = colnms] , colnms)
+
+    for j in 1:8
         for i in eachindex(ns)
-            push!(df_hell_print, df_hell[5*(j-1)+i,:])
-            push!(df_pid_print, df_pid[5*(j-1)+i,:])
+            push!(df_hell_print_1, df_hell[5*(j-1)+i,:])
+            push!(df_pid_print_1, df_pid[5*(j-1)+i,:])
             if j ∉ [3, 6] # these densities are not in l2
-                push!(df_l2_print, df_l2[5*(j-1)+i,:])
+                push!(df_l2_print_1, df_l2[5*(j-1)+i,:])
             end
             if i != 1
-                df_hell_print[end,1] = ""
+                df_hell_print_1[end,1] = ""
                 if j ∉ [3, 6] # these densities are not in l2
-                    df_l2_print[end,1] = ""
+                    df_l2_print_1[end,1] = ""
                 end
-                df_pid_print[end,1] = ""
+                df_pid_print_1[end,1] = ""
             end
-            df_hell_print[end,3:end] = round.(values(df_hell_print[end,3:end]); digits=3)
+            df_hell_print_1[end,3:end] = round.(values(df_hell_print_1[end,3:end]); digits=3)
             if j ∉ [3, 6] # these densities are not in l2
-                df_l2_print[end,3:end] = round.(values(df_l2_print[end,3:end]); digits=3)
+                df_l2_print_1[end,3:end] = round.(values(df_l2_print_1[end,3:end]); digits=3)
             end
-            df_pid_print[end,3:end] = round.(values(df_pid_print[end,3:end]); digits=3)
+            df_pid_print_1[end,3:end] = round.(values(df_pid_print_1[end,3:end]); digits=3)
         end
     end
 
-    hell_table = latexify(df_hell_print; env = :table, booktabs = true, latex = false)
+    for j in 9:16
+        for i in eachindex(ns)
+            push!(df_hell_print_2, df_hell[5*(j-1)+i,:])
+            push!(df_pid_print_2, df_pid[5*(j-1)+i,:])
+            if j ∉ [3, 6] # these densities are not in l2
+                push!(df_l2_print_2, df_l2[5*(j-1)+i,:])
+            end
+            if i != 1
+                df_hell_print_2[end,1] = ""
+                if j ∉ [3, 6] # these densities are not in l2
+                    df_l2_print_2[end,1] = ""
+                end
+                df_pid_print_2[end,1] = ""
+            end
+            df_hell_print_2[end,3:end] = round.(values(df_hell_print_2[end,3:end]); digits=3)
+            if j ∉ [3, 6] # these densities are not in l2
+                df_l2_print_2[end,3:end] = round.(values(df_l2_print_2[end,3:end]); digits=3)
+            end
+            df_pid_print_2[end,3:end] = round.(values(df_pid_print_2[end,3:end]); digits=3)
+        end
+    end
+
+    # Hellinger table part 1
+    hell_table = latexify(df_hell_print_1; env = :table, booktabs = true, latex = false)
     hell_table_vec = split(hell_table, "\n")
     j = 4
-    for i in 1:15
+    for i in 1:7
         hell_table_vec[j+5*i] = hell_table_vec[j+5*i] * " \\hline" 
     end
     hell_table = join(hell_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "hellinger_risk_table.txt"), "w") do io
+    open(joinpath("simulations_data", "risk_tables", "hellinger_risk_table_1.txt"), "w") do io
+        println(io, hell_table)
+    end
+    # Hellinger table part 2
+    hell_table = latexify(df_hell_print_2; env = :table, booktabs = true, latex = false)
+    hell_table_vec = split(hell_table, "\n")
+    j = 4
+    for i in 1:7
+        hell_table_vec[j+5*i] = hell_table_vec[j+5*i] * " \\hline" 
+    end
+    hell_table = join(hell_table_vec, "\n")
+    open(joinpath("simulations_data", "risk_tables", "hellinger_risk_table_2.txt"), "w") do io
         println(io, hell_table)
     end
 
-    pid_table = latexify(df_pid_print; env = :table, booktabs = true, latex = false)
+    # Pid table part 1
+    pid_table = latexify(df_pid_print_1; env = :table, booktabs = true, latex = false)
     pid_table_vec = split(pid_table, "\n")
-    for i in 1:15
+    for i in 1:7
         pid_table_vec[j+5*i] = pid_table_vec[j+5*i] * " \\hline" 
     end
     pid_table = join(pid_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "pid_risk_table.txt"), "w") do io
+    open(joinpath("simulations_data", "risk_tables", "pid_risk_table_1.txt"), "w") do io
+        println(io, pid_table)
+    end
+    # Pid table part 2
+    pid_table = latexify(df_pid_print_2; env = :table, booktabs = true, latex = false)
+    pid_table_vec = split(pid_table, "\n")
+    for i in 1:7
+        pid_table_vec[j+5*i] = pid_table_vec[j+5*i] * " \\hline" 
+    end
+    pid_table = join(pid_table_vec, "\n")
+    open(joinpath("simulations_data", "risk_tables", "pid_risk_table_2.txt"), "w") do io
         println(io, pid_table)
     end
 
-    l2_table = latexify(df_l2_print; env = :table, booktabs = true, latex = false)
+    # L2 table part 1
+    l2_table = latexify(df_l2_print_1; env = :table, booktabs = true, latex = false)
     l2_table_vec = split(l2_table, "\n")
-    for i in 1:13 # two densities are not in L2
+    for i in 1:5 # two densities are not in L2
         l2_table_vec[j+5*i] = l2_table_vec[j+5*i] * " \\hline" 
     end
     l2_table = join(l2_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "l2_risk_table.txt"), "w") do io
+    open(joinpath("simulations_data", "risk_tables", "l2_risk_table_1.txt"), "w") do io
+        println(io, l2_table)
+    end
+    # L2 table part 2
+    l2_table = latexify(df_l2_print_2; env = :table, booktabs = true, latex = false)
+    l2_table_vec = split(l2_table, "\n")
+    for i in 1:7 # two densities are not in L2
+        l2_table_vec[j+5*i] = l2_table_vec[j+5*i] * " \\hline" 
+    end
+    l2_table = join(l2_table_vec, "\n")
+    open(joinpath("simulations_data", "risk_tables", "l2_risk_table_2.txt"), "w") do io
         println(io, l2_table)
     end
 end
@@ -139,7 +201,7 @@ function generate_lrr_figure(n)
     p2 = @df df_lrr_l2 boxplot(cols(), legend=false, color="black", fillalpha=0.3)
     plot!(p2, xticks=(1:length(methods), methods), color="black", fillalpha=0.3, ylabel="LRRₙ(f₀, m)", title="L2 risk, n = $n")
     p3 = @df df_r_pid[:,1:4] boxplot(cols(), legend=false, color="black", fillalpha=0.3)
-    plot!(p3, xticks=(1:4, methods[7:end-2]), color="black", fillalpha=0.3, ylabel="log Rₙ(f₀, m)", title="PID risk, n = $n")
+    plot!(p3, xticks=(1:4, methods[7:end-2]), color="black", fillalpha=0.3, ylabel="Rₙ(f₀, m)", title="PID risk, n = $n")
 
     savefig(p1, joinpath("simulations_data", "figures", "lrr_hell_$n.pdf"))
     savefig(p2, joinpath("simulations_data", "figures", "lrr_l2_$n.pdf"))
