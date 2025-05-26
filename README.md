@@ -11,4 +11,4 @@ Pkg.activate(".")
 ```
 
 ## References
-Simensen, O. H., Hjort, N. L. & Christensen, D. (2025). Random Irregular Histograms.
+Simensen, O. H., Christensen, D. & Hjort, N. L. (2025). Random Irregular Histograms.
