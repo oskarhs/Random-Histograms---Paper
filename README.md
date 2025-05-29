@@ -17,4 +17,4 @@ The simulation study requires a working R installtation together with the follow
 Running the script 'estimate_risk_methods' is quite time consuming, but the calculation can be sped up somewhat by utilizing the fact that the implementation used for regular histogram supports multithreading. As such, setting the number of threads to a value greater than one can offer some speedups when running this script.
 
 ## References
-Simensen, O. H., Christensen, D. & Hjort, N. L. (2025). Random Irregular Histograms. _arXiv preprint_. doi: [10.48550/ARXIV.2505.22034](doi.org/10.48550/ARXIV.2505.22034)
+Simensen, O. H., Christensen, D. & Hjort, N. L. (2025). Random Irregular Histograms. _arXiv preprint_. doi: [10.48550/ARXIV.2505.22034](https://doi.org/10.48550/ARXIV.2505.22034)
