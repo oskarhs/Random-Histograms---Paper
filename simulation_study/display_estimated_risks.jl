@@ -209,8 +209,66 @@ function generate_lrr_figure(n)
 
 end
 
-generate_risk_tables()
+function plot_ranks()
+    methods = String[
+        "Wand", "AIC", "BIC", "BR", "Knuth", "SC",
+        "RIH", "RMG-B", "RMG-R", "TS", "L2CV", "KLCV"
+    ]
+    ns = Int64[50, 200, 1000, 5000, 25000]
+    in_l2 = Bool[
+        true, true, false, true, true, false, true, true,
+        true, true, true, true, true, true, true, true,
+    ]
+    df_hell = CSV.read(joinpath("simulations_data", "hellinger_risks.csv"), DataFrame)
+    df_pid = CSV.read(joinpath("simulations_data", "pid_risks.csv"), DataFrame)
+    df_l2 = CSV.read(joinpath("simulations_data", "l2_risks.csv"), DataFrame)
+    
+    # For each row, find ranks and average them at the end
+    ranks_hell = Matrix{Int64}(undef, size(df_hell, 1), size(df_hell, 2) - 2)
+    ranks_pid = Matrix{Int64}(undef, size(df_pid, 1), size(df_pid, 2) - 2)
+    ranks_l2 = Matrix{Int64}(undef, size(df_l2, 1), size(df_l2, 2) - 2)
+    for i = 1:size(df_hell, 1)
+        ranks_hell[i,:] = df_hell[i,3:end] |> Vector |> sortperm |> invperm
+    end
+    for i = 1:size(df_pid, 1)
+        ranks_pid[i,:] = df_pid[i,3:end] |> Vector |> sortperm |> invperm
+    end
+    for i = 1:size(df_l2, 1)
+        ranks_l2[i,:] = df_l2[i,3:end] |> Vector |> sortperm |> invperm
+    end
+    hell_med = mapslices(median, ranks_hell; dims=1)'
+    pid_med = mapslices(median, ranks_pid; dims=1)'
+    l2_med = mapslices(median, ranks_l2; dims=1)'
+
+    p1 = plot(ylims=[0.9*minimum(hell_med), 1.1*maximum(hell_med)], ylabel="Median rank",
+             xticks=(1:length(methods), methods), title="Hellinger risk")
+    for j in eachindex(methods)
+        plot!(p1, [j, j], [0.0, hell_med[j]], color="black", label="")
+    end
+    scatter!(p1, 1:length(methods), hell_med, label="", color="black", ms=6.0)
+    savefig(p1, joinpath("simulations_data", "figures", "rank_hell.pdf"))
+
+    p2 = plot(ylims=[0.9*minimum(pid_med), 1.1*maximum(pid_med)], ylabel="Median rank",
+             xticks=(1:length(methods), methods), title="PID risk")
+    for j in eachindex(methods)
+        plot!(p2, [j, j], [0.0, pid_med[j]], color="black", label="")
+    end
+    scatter!(p2, 1:length(methods), pid_med, label="", color="black", ms=6.0)
+    savefig(p2, joinpath("simulations_data", "figures", "rank_pid.pdf"))
+
+    p3 = plot(ylims=[0.9*minimum(l2_med), 1.1*maximum(l2_med)], ylabel="Median ranks",
+             xticks=(1:length(methods), methods), title="L2 risk")
+    for j in eachindex(methods)
+        plot!(p3, [j, j], [0.0, l2_med[j]], color="black", label="")
+    end
+    scatter!(p3, 1:length(methods), l2_med, label="", color="black", ms=6.0)
+    savefig(p3, joinpath("simulations_data", "figures", "rank_l2.pdf"))
+end
+
+#= generate_risk_tables()
 
 for n in Int64[50, 200, 1000, 5000, 25000]
     generate_lrr_figure(n)
-end
+end =#
+
+plot_ranks()
