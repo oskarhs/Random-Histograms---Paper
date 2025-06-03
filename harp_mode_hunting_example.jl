@@ -4,7 +4,7 @@ include(joinpath("simulation_study", "loss_functions.jl"))
 include(joinpath("simulation_study", "test_distributions.jl"))
 
 function generate_harp_mode_plot()
-    rng = Xoshiro(6)
+    rng = Xoshiro(34)
     d = Harp()
     n = 5000
     x = rand(rng, d, n)
@@ -38,8 +38,8 @@ function generate_harp_mode_plot()
     for j in eachindex(d_modes)
         plot!(p1, rectangle(2.0*delta[j], 0.18, d_modes[j]-delta[j], 0.0), opacity=0.15, color="black", label="")
     end
-    scatter!(p1, reg_modes[[1,2,3,5,10]], zeros(4), color="red", label="", linecolor="red")
-    scatter!(p1, reg_modes[setdiff(1:end, [1,2,3,5,10])], zeros(10), color="black", label="")
+    scatter!(p1, reg_modes[[1,2,3,4,11]], zeros(4), color="red", label="", linecolor="red")
+    scatter!(p1, reg_modes[setdiff(1:end, [1,2,3,4,11])], zeros(10), color="black", label="")
 
     p2 = plot(xlabel="x", ylabel="Density", title="Random irregular histogram")
     plot!(p2, t, pdf.(d, t), lw=2.0, color="blue", label="")

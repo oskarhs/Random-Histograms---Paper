@@ -144,7 +144,7 @@ function plot_risks_a()
     savefig(p3, joinpath("figures", "investigate_prior_a_k_mean.pdf"))
 end
 
-#plot_risks_k()
+plot_risks_k()
 plot_risks_a()
 
 

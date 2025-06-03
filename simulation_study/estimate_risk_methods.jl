@@ -137,4 +137,5 @@ end
 
 @time estimate_all_risks()
 
-#@time estimate_risk(Xoshiro(1812), Beta(0.5, 0.5), 1000, 500; l2=false)
+#r = estimate_risk(Xoshiro(1812), TrimodalUniform(), 5000, 500; l2=false)
+#println(r[1])

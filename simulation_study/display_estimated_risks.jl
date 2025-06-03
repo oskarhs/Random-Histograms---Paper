@@ -1,4 +1,5 @@
 using AutoHist, Plots, DataFrames, CSV, Latexify, StatsPlots
+import Statistics: median
 
 function generate_risk_tables()
     methods = [
@@ -240,7 +241,7 @@ function plot_ranks()
     pid_med = mapslices(median, ranks_pid; dims=1)'
     l2_med = mapslices(median, ranks_l2; dims=1)'
 
-    p1 = plot(ylims=[0.9*minimum(hell_med), 1.1*maximum(hell_med)], ylabel="Median rank",
+    p1 = plot(ylims=[minimum(hell_med)-1.0, maximum(hell_med)+1.0], ylabel="Median rank",
              xticks=(1:length(methods), methods), title="Hellinger risk")
     for j in eachindex(methods)
         plot!(p1, [j, j], [0.0, hell_med[j]], color="black", label="")
@@ -248,7 +249,7 @@ function plot_ranks()
     scatter!(p1, 1:length(methods), hell_med, label="", color="black", ms=6.0)
     savefig(p1, joinpath("simulations_data", "figures", "rank_hell.pdf"))
 
-    p2 = plot(ylims=[0.9*minimum(pid_med), 1.1*maximum(pid_med)], ylabel="Median rank",
+    p2 = plot(ylims=[minimum(pid_med)-1.0, maximum(pid_med)+1.0], ylabel="Median rank",
              xticks=(1:length(methods), methods), title="PID risk")
     for j in eachindex(methods)
         plot!(p2, [j, j], [0.0, pid_med[j]], color="black", label="")
@@ -256,7 +257,7 @@ function plot_ranks()
     scatter!(p2, 1:length(methods), pid_med, label="", color="black", ms=6.0)
     savefig(p2, joinpath("simulations_data", "figures", "rank_pid.pdf"))
 
-    p3 = plot(ylims=[0.9*minimum(l2_med), 1.1*maximum(l2_med)], ylabel="Median ranks",
+    p3 = plot(ylims=[minimum(l2_med)-1.0, maximum(l2_med)+1.0], ylabel="Median ranks",
              xticks=(1:length(methods), methods), title="L2 risk")
     for j in eachindex(methods)
         plot!(p3, [j, j], [0.0, l2_med[j]], color="black", label="")
@@ -265,10 +266,10 @@ function plot_ranks()
     savefig(p3, joinpath("simulations_data", "figures", "rank_l2.pdf"))
 end
 
-#= generate_risk_tables()
+generate_risk_tables()
 
 for n in Int64[50, 200, 1000, 5000, 25000]
     generate_lrr_figure(n)
-end =#
+end
 
 plot_ranks()
