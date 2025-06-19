@@ -926,7 +926,7 @@ function plot_all_test_distributions()
     titles = [
         "#1 Standard Normal", "#2 Uniform", "#3 Chisq(1)", "#4 Standard Lognormal",
         "#5 Standard Laplace", "#6 Beta(0.5, 0.5)", "#7 Claw",  "#8 Skewed Bimodal",
-        "#9 Asymmetric Double Claw", "#10 Sawtooth", "#11 Triangle", "#12 Marronite",
+        "#9 Asymmetric Claw", "#10 Sawtooth", "#11 Triangle", "#12 Marronite",
         "#13 Harp", "#14 Trimodal Uniform", "#15 Regular Hist", "#16 Irregular Hist"
     ]
     ps = []
@@ -982,7 +982,7 @@ function plot_test_distribution(d::ContinuousUnivariateDistribution)
     titles = [
         "#1 Standard Normal", "#2 Uniform", "#3 Chisq(1)", "#4 Standard Lognormal",
         "#5 Standard Laplace", "#6 Beta(0.5, 0.5)", "#7 Claw",  "#8 Skewed Bimodal",
-        "#9 Asymmetric Double Claw", "#10 Sawtooth", "#11 Triangle", "#12 Marronite",
+        "#9 Asymmetric Claw", "#10 Sawtooth", "#11 Triangle", "#12 Marronite",
         "#13 Harp", "#14 Trimodal Uniform", "#15 Regular Hist", "#16 Irregular Hist"
     ]
     p = plot()
