@@ -166,7 +166,7 @@ References
 
 * Marron, J. S. and Wand, M. P. Exact mean integrated squared error. *The Annals of Statistics*, **20**, 712-736. doi: [10.0.4.190/aos/1176348653](https://doi.org/10.0.4.190/aos/1176348653)
 """
-struct Claw <: ContinuousUnivariateDistribution end # Density 10 from Marron and Wand (1992) [https://doi.org/10.0.4.190/aos/1176348653]
+struct Claw <: ContinuousUnivariateDistribution end
 function pdf(d::Claw, x::Real)
     val = 0.5*pdf(Normal(0.0, 1.0), x)
     for j in -2:2
@@ -219,7 +219,7 @@ Density 8 from Marron and Wand (1992).
 
 References
 
-* Marron, J. S. and Wand, M. P. Exact mean integrated squared error. ^*The Annals of Statistics*, **20**, 712-736. doi: [10.0.4.190/aos/1176348653](https://doi.org/10.0.4.190/aos/1176348653)
+* Marron, J. S. and Wand, M. P. Exact mean integrated squared error. *The Annals of Statistics*, **20**, 712-736. doi: [10.0.4.190/aos/1176348653](https://doi.org/10.0.4.190/aos/1176348653)
 """
 struct SkewedBimodal <: ContinuousUnivariateDistribution end
 function pdf(d::SkewedBimodal, x::Real)
@@ -592,7 +592,7 @@ References
 
 * Marron, J. S. and Wand, M. P. Exact mean integrated squared error. *The Annals of Statistics*, **20**, 712-736. doi: [10.0.4.190/aos/1176348653](https://doi.org/10.0.4.190/aos/1176348653)
 """
-struct StronglySkewed <: ContinuousUnivariateDistribution end # Density 3 in Marron and Wand (1992) [https://10.0.4.190/aos/1176348653]
+struct StronglySkewed <: ContinuousUnivariateDistribution end
 function pdf(d::StronglySkewed, x::Real)
     dens = 0.0
     for j = 0:7
@@ -952,7 +952,7 @@ end
 """
     plot_test_distribution(d::ContinuousUnivariateDistribution)
 
-Plot the probability density function of the test distribution `d`.
+Plot the probability density function of the test distribution `d`. Returns a plot object.
 """
 function plot_test_distribution(d::ContinuousUnivariateDistribution)
     test_distributions = get_test_distributions()
