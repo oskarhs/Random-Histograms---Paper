@@ -29,10 +29,10 @@ function estimate_risks(β)
         for i in eachindex(ns)
             for b = 1:B
                 x = sample_p_vals(rng, π0s[j], ns[i], β)
-                H_irr = histogram_irregular(x; support=(0.0, 1.0), a=5.0, grid="quantile")
+                H_irr = histogram_irregular(x; support=(0.0, 1.0), a=5.0, grid=:quantile, alg = ifelse(ns[i] ≥ 500, GPDP(), DP()))
                 H_reg = histogram_regular(x; support=(0.0, 1.0), a=k->0.5*k)
-                π0_irr = H_irr.weights[end] # estimated density in last bin
-                π0_reg = H_reg.weights[end]
+                π0_irr = H_irr.density[end] # estimated density in last bin
+                π0_reg = H_reg.density[end]
                 rmse_irr[b] = sqrt(mean((π0s[j] - π0_irr)^2))
                 rmse_reg[b] = sqrt(mean((π0s[j] - π0_reg)^2))
             end

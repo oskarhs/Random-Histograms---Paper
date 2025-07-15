@@ -2,7 +2,7 @@
 
 Code supplementing the paper of Simensen et al. (2025).
 
-To run the code, a working Julia installation is required. In addition, an R installation is needed along with KernSmooth package, which is available on cran.
+To run the code, a working Julia installation is required. In addition, an R installation is needed along with a few R packages.
 
 To get started, clone the git repo and run the following commands to install all required Julia packages in the current environment.
 ```julia

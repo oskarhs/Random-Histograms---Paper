@@ -32,17 +32,15 @@ function test_greedy()
     B = 500
     for b = 1:B
         x = randn(rng, 3000)
-        H1 = histogram_irregular(x; greedy=true)
-        H2 = histogram_irregular(x; greedy=false)
+        H1 = histogram_irregular(x; alg=GPDP(greedy=true))
+        H2 = histogram_irregular(x; alg=DP(greedy=false))
         avg_loss += hellinger_loss_hists(H1, H2) / B
     end
-    H1 = histogram_irregular(x; greedy=true)
-    H2 = histogram_irregular(x; greedy=false)
     println("Average Hellinger loss: ", avg_loss)
 
     x = randn(rng, 3000)
-    H1 = histogram_irregular(x; greedy=true)
-    H2 = histogram_irregular(x; greedy=false)
+    H1 = histogram_irregular(x; alg=GPDP(greedy=true))
+    H2 = histogram_irregular(x; alg=DP(greedy=false))
     p = plot(H1, fillalpha=0.2, color="blue")
     plot!(p, H2, fillalpha=0.2, color="red")
 end

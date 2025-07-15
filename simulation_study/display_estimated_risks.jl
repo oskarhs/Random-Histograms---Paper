@@ -7,9 +7,9 @@ function generate_risk_tables()
         "RIH", "RMG-B", "RMG-R", "TS", "L2CV", "KLCV"
     ]
     ns = Int64[50, 200, 1000, 5000, 25000]
-    df_hell = CSV.read(joinpath("simulations_data", "hellinger_risks.csv"), DataFrame)
-    df_pid = CSV.read(joinpath("simulations_data", "pid_risks.csv"), DataFrame)
-    df_l2 = CSV.read(joinpath("simulations_data", "l2_risks.csv"), DataFrame)
+    df_hell = CSV.read(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv"), DataFrame)
+    df_pid = CSV.read(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), DataFrame)
+    df_l2 = CSV.read(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), DataFrame)
 
     # Convert some columns to integer
     df_hell[!, :n] = convert.(Int64, df_hell[!, :n])
@@ -82,7 +82,7 @@ function generate_risk_tables()
         hell_table_vec[j+5*i] = hell_table_vec[j+5*i] * " \\hline" 
     end
     hell_table = join(hell_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "hellinger_risk_table_1.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "hellinger_risk_table_1.txt"), "w") do io
         println(io, hell_table)
     end
     # Hellinger table part 2
@@ -93,7 +93,7 @@ function generate_risk_tables()
         hell_table_vec[j+5*i] = hell_table_vec[j+5*i] * " \\hline" 
     end
     hell_table = join(hell_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "hellinger_risk_table_2.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "hellinger_risk_table_2.txt"), "w") do io
         println(io, hell_table)
     end
 
@@ -104,7 +104,7 @@ function generate_risk_tables()
         pid_table_vec[j+5*i] = pid_table_vec[j+5*i] * " \\hline" 
     end
     pid_table = join(pid_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "pid_risk_table_1.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "pid_risk_table_1.txt"), "w") do io
         println(io, pid_table)
     end
     # Pid table part 2
@@ -114,7 +114,7 @@ function generate_risk_tables()
         pid_table_vec[j+5*i] = pid_table_vec[j+5*i] * " \\hline" 
     end
     pid_table = join(pid_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "pid_risk_table_2.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "pid_risk_table_2.txt"), "w") do io
         println(io, pid_table)
     end
 
@@ -125,7 +125,7 @@ function generate_risk_tables()
         l2_table_vec[j+5*i] = l2_table_vec[j+5*i] * " \\hline" 
     end
     l2_table = join(l2_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "l2_risk_table_1.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "l2_risk_table_1.txt"), "w") do io
         println(io, l2_table)
     end
     # L2 table part 2
@@ -135,7 +135,7 @@ function generate_risk_tables()
         l2_table_vec[j+5*i] = l2_table_vec[j+5*i] * " \\hline" 
     end
     l2_table = join(l2_table_vec, "\n")
-    open(joinpath("simulations_data", "risk_tables", "l2_risk_table_2.txt"), "w") do io
+    open(joinpath(@__DIR__, "simulations_data", "risk_tables", "l2_risk_table_2.txt"), "w") do io
         println(io, l2_table)
     end
 end
@@ -166,9 +166,9 @@ function generate_lrr_figure(n)
         true, true, true, true, true, true, true, true,
     ]
 
-    df_hell = CSV.read(joinpath("simulations_data", "hellinger_risks.csv"), DataFrame)
-    df_pid = CSV.read(joinpath("simulations_data", "pid_risks.csv"), DataFrame)
-    df_l2 = CSV.read(joinpath("simulations_data", "l2_risks.csv"), DataFrame)
+    df_hell = CSV.read(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv"), DataFrame)
+    df_pid = CSV.read(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), DataFrame)
+    df_l2 = CSV.read(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), DataFrame)
 
     # Convert some columns to integer
     df_hell[!, :n] = convert.(Int64, df_hell[!, :n])
@@ -204,9 +204,9 @@ function generate_lrr_figure(n)
     p3 = @df df_r_pid[:,1:4] boxplot(cols(), legend=false, color="black", fillalpha=0.3)
     plot!(p3, xticks=(1:4, methods[7:end-2]), color="black", fillalpha=0.3, ylabel="Rₙ(f₀, m)", title="PID risk, n = $n")
 
-    savefig(p1, joinpath("simulations_data", "figures", "lrr_hell_$n.pdf"))
-    savefig(p2, joinpath("simulations_data", "figures", "lrr_l2_$n.pdf"))
-    savefig(p3, joinpath("simulations_data", "figures", "r_pid_$n.pdf"))
+    savefig(p1, joinpath(@__DIR__, "simulations_data", "figures", "lrr_hell_$n.pdf"))
+    savefig(p2, joinpath(@__DIR__, "simulations_data", "figures", "lrr_l2_$n.pdf"))
+    savefig(p3, joinpath(@__DIR__, "simulations_data", "figures", "r_pid_$n.pdf"))
 
 end
 
@@ -220,9 +220,9 @@ function plot_ranks()
         true, true, false, true, true, false, true, true,
         true, true, true, true, true, true, true, true,
     ]
-    df_hell = CSV.read(joinpath("simulations_data", "hellinger_risks.csv"), DataFrame)
-    df_pid = CSV.read(joinpath("simulations_data", "pid_risks.csv"), DataFrame)
-    df_l2 = CSV.read(joinpath("simulations_data", "l2_risks.csv"), DataFrame)
+    df_hell = CSV.read(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv"), DataFrame)
+    df_pid = CSV.read(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), DataFrame)
+    df_l2 = CSV.read(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), DataFrame)
     
     # For each row, find ranks and average them at the end
     ranks_hell = Matrix{Int64}(undef, size(df_hell, 1), size(df_hell, 2) - 2)
@@ -247,7 +247,7 @@ function plot_ranks()
         plot!(p1, [j, j], [0.0, hell_med[j]], color="black", label="")
     end
     scatter!(p1, 1:length(methods), hell_med, label="", color="black", ms=6.0)
-    savefig(p1, joinpath("simulations_data", "figures", "rank_hell.pdf"))
+    savefig(p1, joinpath(@__DIR__, "simulations_data", "figures", "rank_hell.pdf"))
 
     p2 = plot(ylims=[minimum(pid_med)-1.0, maximum(pid_med)+1.0], ylabel="Median rank",
              xticks=(1:length(methods), methods), title="PID risk")
@@ -255,7 +255,7 @@ function plot_ranks()
         plot!(p2, [j, j], [0.0, pid_med[j]], color="black", label="")
     end
     scatter!(p2, 1:length(methods), pid_med, label="", color="black", ms=6.0)
-    savefig(p2, joinpath("simulations_data", "figures", "rank_pid.pdf"))
+    savefig(p2, joinpath(@__DIR__, "simulations_data", "figures", "rank_pid.pdf"))
 
     p3 = plot(ylims=[minimum(l2_med)-1.0, maximum(l2_med)+1.0], ylabel="Median ranks",
              xticks=(1:length(methods), methods), title="L2 risk")
@@ -263,7 +263,7 @@ function plot_ranks()
         plot!(p3, [j, j], [0.0, l2_med[j]], color="black", label="")
     end
     scatter!(p3, 1:length(methods), l2_med, label="", color="black", ms=6.0)
-    savefig(p3, joinpath("simulations_data", "figures", "rank_l2.pdf"))
+    savefig(p3, joinpath(@__DIR__, "simulations_data", "figures", "rank_l2.pdf"))
 end
 
 generate_risk_tables()

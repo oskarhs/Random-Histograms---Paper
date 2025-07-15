@@ -12,19 +12,19 @@ function generate_harp_mode_plot()
     d_modes = modes(Harp())
     delta = pid_tolerance(Harp())
 
-    H_reg = histogram_regular(x; rule="bic")
-    loss_reg, reg_modes, reg_vals, spur_reg = peak_id_loss(d, H_reg.edges[1], H_reg.weights)
+    h_reg = histogram_regular(x; rule=:bic)
+    loss_reg, reg_modes, reg_vals, spur_reg = peak_id_loss(d, h_reg.breaks, h_reg.density)
     println("PID loss, regular: $loss_reg")
     println("Number of spurious modes, regular: $spur_reg")
 
-    println("Hellinger loss, regular: ", round(hellinger_loss(d, collect(H_reg.edges[1]), H_reg.weights); sigdigits=3))
+    println("Hellinger loss, regular: ", round(hellinger_loss(d, collect(h_reg.breaks), h_reg.density); sigdigits=3))
 
-    H_irreg = histogram_irregular(x; rule="bayes", a=5.0)
-    loss_irreg, irreg_modes, irreg_vals, spur_irreg = peak_id_loss(d, H_irreg.edges[1], H_irreg.weights)
+    h_irreg = histogram_irregular(x; rule=:bayes, a=5.0, alg=GPDP())
+    loss_irreg, irreg_modes, irreg_vals, spur_irreg = peak_id_loss(d, h_irreg.breaks, h_irreg.density)
     println("PID loss, irregular: $loss_irreg")
     println("Number of spurious modes, irregular: $spur_irreg")
 
-    println("Hellinger loss, irregular: ", round(hellinger_loss(d, H_irreg.edges[1], H_irreg.weights); digits=3))
+    println("Hellinger loss, irregular: ", round(hellinger_loss(d, h_irreg.breaks, h_irreg.density); digits=3))
 
     # Generate plots
     rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
@@ -32,7 +32,7 @@ function generate_harp_mode_plot()
     t = LinRange(-3, 90, 10000)
     p1 = plot(xlabel="x", ylabel="Density", title="BIC")
     plot!(p1, t, pdf.(d, t), lw=2.0, color="blue", label="")
-    plot!(p1, H_reg, fillalpha=0.25, normalize=:pdf, color="red", label="", linecolor="red")
+    plot!(p1, h_reg, fillalpha=0.25, normalize=:pdf, color="red", label="", linecolor="red")
     xlims!(p1, -3.5, 90.5)
     ylims!(p1, -0.005, 0.17)
     for j in eachindex(d_modes)
@@ -43,7 +43,7 @@ function generate_harp_mode_plot()
 
     p2 = plot(xlabel="x", ylabel="Density", title="Random irregular histogram")
     plot!(p2, t, pdf.(d, t), lw=2.0, color="blue", label="")
-    plot!(p2, H_irreg, fillalpha=0.25, normalize=:pdf, color="red", label="", linecolor="red")
+    plot!(p2, h_irreg, fillalpha=0.25, normalize=:pdf, color="red", label="", linecolor="red")
     xlims!(p2, -3.5, 90.5)
     ylims!(p2, -0.005, 0.17)
     for j in eachindex(d_modes)
@@ -51,7 +51,7 @@ function generate_harp_mode_plot()
     end
     scatter!(p2, irreg_modes, zeros(length(irreg_modes)), color="red", label="", linecolor="red")
     p3 = plot(p1, p2, layout=(2,1), margin = 0.5*Plots.cm, size=(900, 800))
-    savefig(p3, joinpath("figures", "HarpModeExample.pdf"))
+    savefig(p3, joinpath(@__DIR__, "figures", "HarpModeExample.pdf"))
 end
 
 p1, p2 = generate_harp_mode_plot()

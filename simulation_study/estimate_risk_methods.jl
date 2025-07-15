@@ -63,20 +63,20 @@ function estimate_risk(rng, d, n, B; l2=false)
         loss_hell[b,1], loss_pid[b,1], loss_l2[b,1] = compute_losses(d, breaks, dens; l2=l2)
         for j = 2:4
             # aic, bic and br
-            H = histogram_regular(x; rule=methods[j])
+            H = histogram_regular(x; rule=Symbol(methods[j]))
             breaks = collect(H.edges[1])
             loss_hell[b,j], loss_pid[b,j], loss_l2[b,j] = compute_losses(d, breaks, H.weights; l2=l2)
         end
         # Knuth
-        H = histogram_regular(x; rule="bayes", a = k->0.5*k)
+        H = histogram_regular(x; rule=:bayes, a = k->0.5*k)
         breaks = collect(H.edges[1])
         loss_hell[b,5], loss_pid[b,5], loss_l2[b,5] = compute_losses(d, breaks, H.weights; l2=l2)
         # SC
-        H = histogram_regular(x; rule="bayes", a = k->1.0*k)
+        H = histogram_regular(x; rule=:bayes, a = k->1.0*k)
         breaks = collect(H.edges[1])
         loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.weights; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule="bayes", grid="regular", a = 5.0)
+        H = histogram_irregular(x; rule=:bayes, grid=:regular, a = 5.0)
         loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.edges[1], H.weights; l2=l2)
         # RMG-B
         breaks, dens = rmg_hist(x, "penB")
@@ -88,10 +88,10 @@ function estimate_risk(rng, d, n, B; l2=false)
         breaks, dens = taut_string(x; sorted=false)
         loss_hell[b,10], loss_pid[b,10], loss_l2[b,10] = compute_losses(d, breaks, dens; l2=l2)
         # L2CV
-        H = histogram_irregular(x; rule="l2cv", grid="data", use_min_length=true)
+        H = histogram_irregular(x; rule=:l2cv, grid=:data, use_min_length=true)
         loss_hell[b,11], loss_pid[b,11], loss_l2[b,11] = compute_losses(d, H.edges[1], H.weights; l2=l2)
         # KLCV
-        H = histogram_irregular(x; rule="klcv", grid="data", use_min_length=true)
+        H = histogram_irregular(x; rule=:klcv, grid=:data, use_min_length=true)
         loss_hell[b,12], loss_pid[b,12], loss_l2[b,12] = compute_losses(d, H.edges[1], H.weights; l2=l2)
     end
     for j=1:num_methods
@@ -130,12 +130,14 @@ function estimate_all_risks()
         end
     end
     # Write the data to csv files
-    CSV.write(joinpath("simulations_data", "hellinger_risks.csv"), df_hell)
-    CSV.write(joinpath("simulations_data", "pid_risks.csv"), df_pid)
-    CSV.write(joinpath("simulations_data", "l2_risks.csv"), df_l2)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv"), df_hell)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), df_pid)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), df_l2)
 end
 
-@time estimate_all_risks()
+#@time estimate_all_risks()
 
-#r = estimate_risk(Xoshiro(1812), TrimodalUniform(), 5000, 500; l2=false)
+r = estimate_risk(Xoshiro(1812), TrimodalUniform(), 5000, 500; l2=false)
 #println(r[1])
+
+#println(isfile(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv")))
