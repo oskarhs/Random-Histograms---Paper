@@ -53,7 +53,8 @@ function compute_risk_k(n, d, rng)
     for j in eachindex(logpriors)
         for b = 1:B
             x = rand(rng, d, n)
-            H = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid=:regular, support=support_d)
+            H = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid=:regular, support=support_d,
+                alg = ifelse(n ≥ 500, GPDP(), DP()))
             loss[j,b] = hell_loss(H.density, H.breaks, d)
         end
         risk[j] = mean(loss[j,:])
@@ -69,6 +70,7 @@ function plot_risks_k()
 
     for i in eachindex(ns)
         for j in eachindex(dists)
+            println("i = ", i, ", j = ", j)
             risks[i,j,:] = compute_risk_k(ns[i], dists[j], Xoshiro(1812))
         end
     end
@@ -105,6 +107,7 @@ function plot_risks_a()
 
     for i in eachindex(ns)
         for j in eachindex(dists)
+            println("i = ", i, ", j = ", j)
             risks[i,j,:], k_means[i,j,:] = compute_risk_a(ns[i], dists[j], Xoshiro(1812))
         end
     end

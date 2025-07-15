@@ -64,20 +64,20 @@ function estimate_risk(rng, d, n, B; l2=false)
         for j = 2:4
             # aic, bic and br
             H = histogram_regular(x; rule=Symbol(methods[j]))
-            breaks = collect(H.edges[1])
-            loss_hell[b,j], loss_pid[b,j], loss_l2[b,j] = compute_losses(d, breaks, H.weights; l2=l2)
+            breaks = collect(H.breaks)
+            loss_hell[b,j], loss_pid[b,j], loss_l2[b,j] = compute_losses(d, breaks, H.density; l2=l2)
         end
         # Knuth
         H = histogram_regular(x; rule=:bayes, a = k->0.5*k)
-        breaks = collect(H.edges[1])
-        loss_hell[b,5], loss_pid[b,5], loss_l2[b,5] = compute_losses(d, breaks, H.weights; l2=l2)
+        breaks = collect(H.breaks)
+        loss_hell[b,5], loss_pid[b,5], loss_l2[b,5] = compute_losses(d, breaks, H.density; l2=l2)
         # SC
         H = histogram_regular(x; rule=:bayes, a = k->1.0*k)
-        breaks = collect(H.edges[1])
-        loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.weights; l2=l2)
+        breaks = collect(H.breaks)
+        loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.density; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule=:bayes, grid=:regular, a = 5.0)
-        loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.edges[1], H.weights; l2=l2)
+        H = histogram_irregular(x; rule=:bayes, grid=:regular, a = 5.0, alg = ifelse(n ≥ 500, GPDP(), DP()))
+        loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.breaks, H.density; l2=l2)
         # RMG-B
         breaks, dens = rmg_hist(x, "penB")
         loss_hell[b,8], loss_pid[b,8], loss_l2[b,8] = compute_losses(d, breaks, dens; l2=l2)
@@ -89,10 +89,10 @@ function estimate_risk(rng, d, n, B; l2=false)
         loss_hell[b,10], loss_pid[b,10], loss_l2[b,10] = compute_losses(d, breaks, dens; l2=l2)
         # L2CV
         H = histogram_irregular(x; rule=:l2cv, grid=:data, use_min_length=true)
-        loss_hell[b,11], loss_pid[b,11], loss_l2[b,11] = compute_losses(d, H.edges[1], H.weights; l2=l2)
+        loss_hell[b,11], loss_pid[b,11], loss_l2[b,11] = compute_losses(d, H.breaks, H.density; l2=l2)
         # KLCV
         H = histogram_irregular(x; rule=:klcv, grid=:data, use_min_length=true)
-        loss_hell[b,12], loss_pid[b,12], loss_l2[b,12] = compute_losses(d, H.edges[1], H.weights; l2=l2)
+        loss_hell[b,12], loss_pid[b,12], loss_l2[b,12] = compute_losses(d, H.breaks, H.density; l2=l2)
     end
     for j=1:num_methods
         risk_hell[j] = mean(loss_hell[:,j])
