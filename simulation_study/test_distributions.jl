@@ -1,6 +1,6 @@
 using Random, Distributions, Plots, StatsBase
-using RCall
-@rimport benchden as bd
+#using RCall
+#@rimport benchden as bd
 
 import Base: rand
 import Distributions: pdf, cdf, support
@@ -136,7 +136,7 @@ function rand(rng::AbstractRNG, d::Claw)
     return x
 end
 function modes(d::Claw)
-    return rcopy(Array{Float64}, R"benchden::berdev(23)$peaks")
+    return Float64[-0.9969638, -0.4978001, 0.0, 0.4978001, 0.9969638]
 end
 function pid_tolerance(d::Claw)
     return [0.08, 0.0855, 0.0885, 0.0855, 0.08]
@@ -167,7 +167,7 @@ function rand(rng::AbstractRNG, d::SkewedBimodal)
     return x
 end
 function modes(d::SkewedBimodal)
-    return rcopy(Array{Float64}, R"benchden::berdev(22)$peaks")
+    return Float64[0.0005446896, 1.4425250000]
 end
 function pid_tolerance(d::SkewedBimodal)
     return [0.744, 0.289]
@@ -207,7 +207,7 @@ function rand(rng::AbstractRNG, d::SmoothComb)
     return x
 end
 function modes(d::SmoothComb)
-    return rcopy(Array{Float64}, R"benchden::berdev(24)$peaks")
+    return Float64[-1.4761910, 0.8095009, 1.9523700, 2.5238040, 2.8095210, 2.9523800]
 end
 
 struct Sawtooth <: ContinuousUnivariateDistribution end
@@ -231,7 +231,7 @@ function rand(rng::AbstractRNG, d::Sawtooth)
     return x
 end
 function modes(d::Sawtooth)
-    return rcopy(Array{Float64}, R"benchden::berdev(27)$peaks")
+    return Float64[-1.4761910, 0.8095009, 1.9523700, 2.5238040, 2.8095210, 2.9523800]
 end
 function pid_tolerance(d::Sawtooth)
     return [0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736, 0.28574999999997736]
@@ -306,7 +306,7 @@ function rand(rng::AbstractRNG, d::Marronite)
     return x
 end
 function modes(d::Marronite)
-    return rcopy(Array{Float64}, R"benchden::berdev(21)$peaks")
+    return Float64[-20.0, 0.0]
 end
 function pid_tolerance(d::Marronite)
     return [0.1612, 0.6447]
@@ -353,7 +353,7 @@ function rand(rng::AbstractRNG, d::TrimodalUniform)
     return x
 end
 function modes(d::TrimodalUniform)
-    return rcopy(Array{Float64}, R"benchden::berdev(26)$peaks")
+    return Float64[-20.05, 0.00, 20.05]
 end
 function pid_tolerance(d::TrimodalUniform)
     return [0.02775, 0.55485, 0.02775]
@@ -583,6 +583,7 @@ function rand(rng::AbstractRNG, d::TenNormalMixture)
     j = rand(rng, DiscreteUniform(1, 10))
     return rand(rng, Normal(5*j-5, 1))
 end
+
 
 struct Harp <: ContinuousUnivariateDistribution end
 function pdf(d::Harp, x::Real)

@@ -3,7 +3,7 @@ using AutoHist, Plots, StatsBase
 function run_example()
     p_values = parse.(Float64, readlines(joinpath(@__DIR__, "hedenfalk.txt")))
 
-    h1 = histogram_irregular(p_values; grid=:quantile, support=(0.0, 1.0), a = 5.0, alg=GPDP())
+    h1 = histogram_irregular(p_values; grid=:data, support=(0.0, 1.0), a = 5.0, alg=GPDP())
     p1 = plot(h1, alpha=0.5, xlabel="p", ylabel="Density", xlims=[-0.02, 1.02], label="", color="grey", title="Irregular histogram")
 
     savefig(p1, joinpath(@__DIR__, "figures", "hedenfalk_irregular.pdf"))

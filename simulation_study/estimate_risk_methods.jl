@@ -76,7 +76,7 @@ function estimate_risk(rng, d, n, B; l2=false)
         breaks = collect(H.breaks)
         loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.density; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule=:bayes, grid=:regular, a = 5.0, alg = ifelse(n ≥ 500, GPDP(), DP()))
+        H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = ifelse(n ≥ 500, GPDP(), DP()))
         loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.breaks, H.density; l2=l2)
         # RMG-B
         breaks, dens = rmg_hist(x, "penB")

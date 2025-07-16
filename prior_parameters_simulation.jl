@@ -29,7 +29,7 @@ function compute_risk_a(n, d, rng)
     for j in eachindex(as)
         for b = 1:B
             x = rand(rng, d, n)
-            H = histogram_irregular(x; a = as[j], grid=:regular, support=support_d,
+            H = histogram_irregular(x; a = as[j], grid=:data, support=support_d,
                 alg = ifelse(n ≥ 500, GPDP(), DP()))
             loss[j,b] = hell_loss(H.density, H.breaks, d)
             k_opt[j,b] = length(H.density)
@@ -53,7 +53,7 @@ function compute_risk_k(n, d, rng)
     for j in eachindex(logpriors)
         for b = 1:B
             x = rand(rng, d, n)
-            H = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid=:regular, support=support_d,
+            H = histogram_irregular(x; a = 1.0, logprior=logpriors[j], grid=:data, support=support_d,
                 alg = ifelse(n ≥ 500, GPDP(), DP()))
             loss[j,b] = hell_loss(H.density, H.breaks, d)
         end
@@ -148,8 +148,8 @@ function plot_risks_a()
     savefig(p3, joinpath(@__DIR__, "figures", "investigate_prior_a_k_mean.pdf"))
 end
 
-println(compute_risk_k(10^3, TDist(3), Xoshiro(1)))
-#plot_risks_k()
-#plot_risks_a()
+#println(compute_risk_k(10^3, TDist(3), Xoshiro(1)))
+plot_risks_k()
+plot_risks_a()
 
 
