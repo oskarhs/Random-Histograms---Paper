@@ -1,17 +1,17 @@
-using AutoHist, Integrals, Random, Distributions, Plots
+using AutoHist, Integrals, Random, Distributions, Plots, FastGaussQuadrature
 import SpecialFunctions.loggamma
 
 function hell_loss(dens_hist, bin_edges, d)
     k = length(bin_edges) - 1
 
     ip = IntegralProblem((t,p) -> pdf(d, t), -Inf, bin_edges[1])
-    hell = solve(ip, QuadGKJL()).u
+    hell = solve(ip, GaussLegendre()).u
     for j = 1:k
         ip = IntegralProblem((t,p) -> (sqrt(pdf(d, t)) - sqrt(dens_hist[j]))^2, bin_edges[j], bin_edges[j+1])
-        hell = hell + solve(ip, QuadGKJL()).u
+        hell = hell + solve(ip, GaussLegendre()).u
     end
     ip = IntegralProblem((t,p) -> pdf(d, t), bin_edges[k+1], Inf)
-    hell = hell + solve(ip, QuadGKJL()).u
+    hell = hell + solve(ip, GaussLegendre()).u
     return sqrt(hell)
 end
 
@@ -148,7 +148,8 @@ function plot_risks_a()
     savefig(p3, joinpath(@__DIR__, "figures", "investigate_prior_a_k_mean.pdf"))
 end
 
-plot_risks_k()
-plot_risks_a()
+println(compute_risk_k(10^3, TDist(3), Xoshiro(1)))
+#plot_risks_k()
+#plot_risks_a()
 
 
