@@ -1,9 +1,9 @@
 using Random, AutoHist, DataFrames, CSV
 
-include("loss_functions.jl")
-include(joinpath("R_methods", "wand_hist.jl"))
-include(joinpath("R_methods", "RMG_hist.jl"))
-include(joinpath("R_methods", "taut_string.jl"))
+include(joinpath(@__DIR__, "loss_functions.jl"))
+include(joinpath(@__DIR__, "R_methods", "wand_hist.jl"))
+include(joinpath(@__DIR__, "R_methods", "RMG_hist.jl"))
+include(joinpath(@__DIR__, "R_methods", "taut_string.jl"))
 
 # Run this from the simulation_study folder
 # To speed up the code a little, open Julia with multiple threads.
@@ -63,7 +63,7 @@ function estimate_risk(rng, d, n, B; l2=false)
         loss_hell[b,1], loss_pid[b,1], loss_l2[b,1] = compute_losses(d, breaks, dens; l2=l2)
         for j = 2:4
             # aic, bic and br
-            H = histogram_regular(x; rule=Symbol(methods[j]))
+            H = histogram_regular(x; rule=Symbol(lowercase(methods[j])))
             breaks = collect(H.breaks)
             loss_hell[b,j], loss_pid[b,j], loss_l2[b,j] = compute_losses(d, breaks, H.density; l2=l2)
         end
@@ -76,7 +76,7 @@ function estimate_risk(rng, d, n, B; l2=false)
         breaks = collect(H.breaks)
         loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.density; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = ifelse(n ≥ 500, GPDP(), DP()))
+        H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = DP())
         loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.breaks, H.density; l2=l2)
         # RMG-B
         breaks, dens = rmg_hist(x, "penB")
@@ -88,10 +88,10 @@ function estimate_risk(rng, d, n, B; l2=false)
         breaks, dens = taut_string(x; sorted=false)
         loss_hell[b,10], loss_pid[b,10], loss_l2[b,10] = compute_losses(d, breaks, dens; l2=l2)
         # L2CV
-        H = histogram_irregular(x; rule=:l2cv, grid=:data, use_min_length=true)
+        H = histogram_irregular(x; rule=:l2cv, grid=:data, use_min_length=true, alg=DP())
         loss_hell[b,11], loss_pid[b,11], loss_l2[b,11] = compute_losses(d, H.breaks, H.density; l2=l2)
         # KLCV
-        H = histogram_irregular(x; rule=:klcv, grid=:data, use_min_length=true)
+        H = histogram_irregular(x; rule=:klcv, grid=:data, use_min_length=true, alg=DP())
         loss_hell[b,12], loss_pid[b,12], loss_l2[b,12] = compute_losses(d, H.breaks, H.density; l2=l2)
     end
     for j=1:num_methods
@@ -135,9 +135,9 @@ function estimate_all_risks()
     CSV.write(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), df_l2)
 end
 
-#@time estimate_all_risks()
+@time estimate_all_risks()
 
-r = estimate_risk(Xoshiro(1812), TrimodalUniform(), 5000, 500; l2=false)
+#r = estimate_risk(Xoshiro(1812), Chisq(1.0), 25000, 500; l2=false)
 #println(r[1])
 
 #println(isfile(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv")))
