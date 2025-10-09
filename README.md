@@ -11,7 +11,7 @@ Pkg.activate(".")
 ```
 
 # A note on required R packages
-The simulation study requires a working R installation together with the following packages: 'KernSmooth', 'histogram' and 'pmden'.
+The simulation study requires a working R installation together with the following packages: 'KernSmooth', 'histogram', 'multimode' and 'pmden'. The first three packages are available on CRAN, while the third can be downloaded from the CRAN [archive](https://cran.r-project.org/src/contrib/Archive/ftnonpar/).
 
 # A note on running the simulation study
 Running the script 'estimate_risk_methods' is quite time consuming, but the calculation can be sped up somewhat by utilizing the fact that the implementation used for regular histogram supports multithreading. As such, setting the number of threads to a value greater than one can offer some speedups when running this script.
