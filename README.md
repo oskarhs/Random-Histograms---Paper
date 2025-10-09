@@ -1,6 +1,6 @@
 # Random Irregular Histograms
 
-Code supplementing the paper of [Simensen et al. (2025)](#simensen2025random)\].
+Code supplementing the paper of [Simensen et al. (2025)](#simensen2025random).
 
 To run the code, a working Julia installation is required. In addition, an R installation is needed along with a few R packages.
 
