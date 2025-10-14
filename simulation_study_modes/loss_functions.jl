@@ -4,6 +4,7 @@ import MergeSorted: mergesorted
 
 include("test_distributions.jl")
 
+# peak_id_loss for histograms
 function peak_id_loss(d::ContinuousUnivariateDistribution, breaks_hist::AbstractVector{<:Real}, dens_hist::AbstractVector{<:Real};
                       verbose::Bool=false)
     # Identify locations of modes in the histogram density
@@ -67,5 +68,24 @@ function peak_id_loss(d::ContinuousUnivariateDistribution, breaks_hist::Abstract
     if verbose
         println("Not identified: $(length(true_modes) - C), Spurious: $(length(hist_modes) - C)")
     end
-    return (length(true_modes) - C) + (length(hist_modes) - C), hist_modes, mode_val, (length(hist_modes) - C)
+    return (length(true_modes) - C) + (length(hist_modes) - C), length(hist_modes)
+end
+
+# peak id loss for kernel estimates (the estimated mode locations are given as inputs)
+function peak_id_loss(d::ContinuousUnivariateDistribution, est_modes::AbstractVector{<:Real};
+                      verbose::Bool=false)
+    true_modes = modes(d)
+    delta = pid_tolerance(d)
+
+    C = 0 # number of correctly identified modes
+    for j in eachindex(true_modes)
+        if minimum(abs.(true_modes[j] .- est_modes)) < delta[j]
+            C = C + 1
+        end
+    end
+    if verbose
+        println("Not identified: $(length(true_modes) - C), Spurious: $(length(est_modes) - C)")
+    end
+    # Return pid_loss and number of modes
+    return (length(true_modes) - C) + (length(est_modes) - C), length(est_modes)
 end

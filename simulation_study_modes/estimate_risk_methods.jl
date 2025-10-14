@@ -1,8 +1,8 @@
 using Random, AutoHist, DataFrames, CSV
 
 include(joinpath(@__DIR__, "loss_functions.jl"))
-include(joinpath(@__DIR__, "R_methods", "wand_hist.jl"))
-include(joinpath(@__DIR__, "R_methods", "RMG_hist.jl"))
+include(joinpath(@__DIR__, "R_methods", "hpi.jl"))
+include(joinpath(@__DIR__, "R_methods", "modetest.jl"))
 include(joinpath(@__DIR__, "R_methods", "taut_string.jl"))
 
 # Run this from the simulation_study folder
@@ -10,8 +10,7 @@ include(joinpath(@__DIR__, "R_methods", "taut_string.jl"))
 
 function get_methods()
     return [
-        "Wand", "AIC", "BIC", "BR", "Knuth", "SC",
-        "RIH", "RMG-B", "RMG-R", "TS", "L2CV", "KLCV"
+        "RIH", "SI", "FM", "WJ"
     ]
 end
 
@@ -34,105 +33,80 @@ function bin_regular(x::AbstractVector{<:Real}, xmin::Real, xmax::Real, k::Int, 
     return bincounts
 end
 
-function compute_losses(d::ContinuousUnivariateDistribution, breaks::AbstractVector{<:Real}, dens::AbstractVector{<:Real}; l2::Bool=false)
-    loss_hell = hellinger_loss(d, breaks, dens)
-    loss_pid, _, _, _ = peak_id_loss(d, breaks, dens)
-    if l2
-        loss_l2 = l2_loss(d, breaks, dens)
-    else 
-        loss_l2 = 0.0
-    end
-    return loss_hell, loss_pid, loss_l2
+# For histograms
+function compute_losses(d::ContinuousUnivariateDistribution, breaks::AbstractVector{<:Real}, dens::AbstractVector{<:Real})
+    loss_pid, num_est_modes = peak_id_loss(d, breaks, dens)
+    return loss_pid, num_est_modes
+end
+
+# For kernel estimators
+function compute_losses(d::ContinuousUnivariateDistribution, est_modes::AbstractVector{<:Real})
+    loss_pid, num_est_modes = peak_id_loss(d, est_modes)
+    return loss_pid, num_est_modes
 end
 
 # Estimate risk for all methods for a sample of size n from a density f₀
-function estimate_risk(rng, d, n, B; l2=false)
+function estimate_risk(rng, d, n, B)
     methods = get_methods()
     num_methods = length(methods)    
 
-    risk_hell = Array{Float64}(undef, num_methods)
-    risk_l2 = Array{Float64}(undef, num_methods)
+    mean_num_modes = Vector{Float64}(undef, num_methods)
     risk_pid = Array{Float64}(undef, num_methods)
-    loss_hell = Array{Float64}(undef, B, num_methods)
-    loss_l2 = Array{Float64}(undef, B, num_methods)
-    loss_pid = Array{Float64}(undef, B, num_methods)
+    num_modes = Array{Float64}(undef, B, num_methods)
+    num_modes = Array{Float64}(undef, B, num_methods)
+    elapsed = Matrix{Float64}(undef, B, num_methods)
+    median_elapsed = Vector{Float64}(undef, num_methods)
 
     for b = 1:B
         x = rand(rng, d, n)
-        breaks, dens = wand_hist(x)
-        loss_hell[b,1], loss_pid[b,1], loss_l2[b,1] = compute_losses(d, breaks, dens; l2=l2)
-        for j = 2:4
-            # aic, bic and br
-            H = histogram_regular(x; rule=Symbol(lowercase(methods[j])))
-            breaks = collect(H.breaks)
-            loss_hell[b,j], loss_pid[b,j], loss_l2[b,j] = compute_losses(d, breaks, H.density; l2=l2)
-        end
-        # Knuth
-        H = histogram_regular(x; rule=:bayes, a = k->0.5*k)
-        breaks = collect(H.breaks)
-        loss_hell[b,5], loss_pid[b,5], loss_l2[b,5] = compute_losses(d, breaks, H.density; l2=l2)
-        # SC
-        H = histogram_regular(x; rule=:bayes, a = k->1.0*k)
-        breaks = collect(H.breaks)
-        loss_hell[b,6], loss_pid[b,6], loss_l2[b,6] = compute_losses(d, breaks, H.density; l2=l2)
         # RIH
-        H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = DP())
-        loss_hell[b,7], loss_pid[b,7], loss_l2[b,7] = compute_losses(d, H.breaks, H.density; l2=l2)
-        # RMG-B
-        breaks, dens = rmg_hist(x, "penB")
-        loss_hell[b,8], loss_pid[b,8], loss_l2[b,8] = compute_losses(d, breaks, dens; l2=l2)
-        # RMG-R
-        breaks, dens = rmg_hist(x, "penR")
-        loss_hell[b,9], loss_pid[b,9], loss_l2[b,9] = compute_losses(d, breaks, dens; l2=l2)
-        # Taut String
-        breaks, dens = taut_string(x; sorted=false)
-        loss_hell[b,10], loss_pid[b,10], loss_l2[b,10] = compute_losses(d, breaks, dens; l2=l2)
-        # L2CV
-        H = histogram_irregular(x; rule=:l2cv, grid=:data, use_min_length=true, alg=DP())
-        loss_hell[b,11], loss_pid[b,11], loss_l2[b,11] = compute_losses(d, H.breaks, H.density; l2=l2)
-        # KLCV
-        H = histogram_irregular(x; rule=:klcv, grid=:data, use_min_length=true, alg=DP())
-        loss_hell[b,12], loss_pid[b,12], loss_l2[b,12] = compute_losses(d, H.breaks, H.density; l2=l2)
+        elapsed[b,1] = @elapsed(H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = DP()))
+        loss_pid[b,1], num_modes[b,2] = compute_losses(d, H.breaks, H.density)
+        # SI
+        est_modes, elapsed[b,2] = modetest(x; method="SI")
+        loss_pid[b,2], num_modes[b,2] = compute_losses(d, est_modes)
+        # FM
+        est_modes, elapsed[b,3] = modetest(x; method="FM")
+        loss_pid[b,3], num_modes[b,3] = compute_losses(d, est_modes)
+        # WJ
+        est_modes, elapsed[b,4] = hpi(x)
+        loss_pid[b,4], num_modes[b,4] = compute_losses(d, est_modes)
     end
     for j=1:num_methods
-        risk_hell[j] = mean(loss_hell[:,j])
         risk_pid[j] = mean(loss_pid[:,j])
-        risk_l2[j] = mean(loss_l2[:,j])
+        median_elapsed[j] = median(elapsed[:,j])
+        mean_num_modes[j] = mean(num_modes[:,j])
     end
-    return risk_hell, risk_pid, risk_l2
+    return risk_pid, median_elapsed, mean_num_modes
 end
 
 function estimate_all_risks()
     methods = get_methods()
     test_densities = get_test_distributions()
-    in_l2 = Bool[
-        true, true, false, true, true, false, true, true,
-        true, true, true, true, true, true, true, true,
-    ]
     rng = Xoshiro(1812)
 
-    ns = Int64[50, 200, 1000, 5000, 25000]
-    B = 500
+    ns = Int64[200, 1000, 5000]
+    B = 200
 
     colnms = vcat(["Density"], ["n"], methods)
-    df_hell = DataFrame([[] for _ = colnms] , colnms)
     df_pid = DataFrame([[] for _ = colnms] , colnms)
-    df_l2 = DataFrame([[] for _ = colnms] , colnms)
+    df_elapsed = DataFrame([[] for _ = colnms] , colnms)
+    df_num_modes = DataFrame([[] for _ = colnms] , colnms)
 
     for j in eachindex(test_densities)
         d = test_densities[j]
         for i in eachindex(ns)
             println("j = $j of $(length(test_densities)), i = $(i) of $(length(ns))")
-            risk_hell, risk_pid, risk_l2 = estimate_risk(rng, d, ns[i], B; l2=in_l2[j])
-            push!(df_hell, vcat(j, ns[i], risk_hell))
+            risk_pid, median_elapsed, mean_num_modes = estimate_risk(rng, d, ns[i], B)
             push!(df_pid, vcat(j, ns[i], risk_pid))
-            push!(df_l2, vcat(j, ns[i], risk_l2))
+            push!(df_elapsed, vcat(j, ns[i], median_elapsed))
+            push!(df_num_modes, vcat(j, ns[i], mean_num_modes))
         end
     end
     # Write the data to csv files
-    CSV.write(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv"), df_hell)
     CSV.write(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), df_pid)
-    CSV.write(joinpath(@__DIR__, "simulations_data", "l2_risks.csv"), df_l2)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "elapsed.csv"), df_elapsed)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "num_modes.csv"), df_num_modes)
 end
 
 @time estimate_all_risks()
