@@ -18,7 +18,9 @@ function modetest(x::Vector{Float64}; method::String)
             p_value = multimode::modetest(x, mod0=num_est_modes, method=method, n=1024, B=100)[['p.value']]
             iter = iter + 1
         }
-        est_modes = suppressWarnings(multimode::locmodes(x, mod0=num_est_modes, n=1024)[['locations']])
+        # Note: Odd indices are modes, even indices are antimodes
+        extremes = suppressWarnings(multimode::locmodes(x, mod0=num_est_modes, n=1024))[['locations']]
+        est_modes = extremes[seq(1,length(extremes), by=2)] # Take length of est_modes, not obj.
         t2 = proc.time()
         time = t2 - t1
         elapsed = unname(time['elapsed'])

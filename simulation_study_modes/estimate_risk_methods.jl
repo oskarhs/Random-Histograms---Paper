@@ -1,8 +1,9 @@
-using Random, AutoHist, DataFrames, CSV
+using Distributed
+using Random, AutoHist, DataFrames, CSV, ProgressMeter
 
 include(joinpath(@__DIR__, "loss_functions.jl"))
 include(joinpath(@__DIR__, "R_methods", "hpi.jl"))
-include(joinpath(@__DIR__, "R_methods", "modetest.jl"))
+include(joinpath(@__DIR__, "R_methods", "multimode.jl"))
 include(joinpath(@__DIR__, "R_methods", "taut_string.jl"))
 
 # Run this from the simulation_study folder
@@ -12,25 +13,6 @@ function get_methods()
     return [
         "RIH", "SI", "FM", "WJ"
     ]
-end
-
-# Compute bins on a regular grid
-function bin_regular(x::AbstractVector{<:Real}, xmin::Real, xmax::Real, k::Int, right::Bool)
-    R = xmax - xmin
-    bincounts = zeros(Float64, k)
-    edges_inc = k/R
-    if right
-        for val in x
-            idval = min(k-1, floor(Int, (val-xmin)*edges_inc+eps())) + 1
-            @inbounds bincounts[idval] += 1.0
-        end
-    else
-        for val in x
-            idval = max(0, floor(Int, (val-xmin)*edges_inc-eps())) + 1
-            @inbounds bincounts[idval] += 1.0
-        end
-    end
-    return bincounts
 end
 
 # For histograms
@@ -46,22 +28,26 @@ function compute_losses(d::ContinuousUnivariateDistribution, est_modes::Abstract
 end
 
 # Estimate risk for all methods for a sample of size n from a density f₀
-function estimate_risk(rng, d, n, B)
+function estimate_risk(rng, d, n, B; progress=true)
     methods = get_methods()
     num_methods = length(methods)    
 
     mean_num_modes = Vector{Float64}(undef, num_methods)
     risk_pid = Array{Float64}(undef, num_methods)
-    num_modes = Array{Float64}(undef, B, num_methods)
+    median_elapsed = Vector{Float64}(undef, num_methods)
+    loss_pid = Array{Float64}(undef, B, num_methods)
     num_modes = Array{Float64}(undef, B, num_methods)
     elapsed = Matrix{Float64}(undef, B, num_methods)
-    median_elapsed = Vector{Float64}(undef, num_methods)
+
+    # Progressbar
+    pm = progress ? Progress(B; desc="Computing PID risk:", barlen=31) : nothing
 
     for b = 1:B
+        #println(b)
         x = rand(rng, d, n)
         # RIH
         elapsed[b,1] = @elapsed(H = histogram_irregular(x; rule=:bayes, grid=:data, a = 5.0, alg = DP()))
-        loss_pid[b,1], num_modes[b,2] = compute_losses(d, H.breaks, H.density)
+        loss_pid[b,1], num_modes[b,1] = compute_losses(d, H.breaks, H.density)
         # SI
         est_modes, elapsed[b,2] = modetest(x; method="SI")
         loss_pid[b,2], num_modes[b,2] = compute_losses(d, est_modes)
@@ -71,6 +57,10 @@ function estimate_risk(rng, d, n, B)
         # WJ
         est_modes, elapsed[b,4] = hpi(x)
         loss_pid[b,4], num_modes[b,4] = compute_losses(d, est_modes)
+
+        if !isnothing(pm)
+            next!(pm; showvalues=[("Iteration", b, "of", B)])
+        end
     end
     for j=1:num_methods
         risk_pid[j] = mean(loss_pid[:,j])
@@ -85,7 +75,7 @@ function estimate_all_risks()
     test_densities = get_test_distributions()
     rng = Xoshiro(1812)
 
-    ns = Int64[200, 1000, 5000]
+    ns = Int64[200, 600, 2000]
     B = 200
 
     colnms = vcat(["Density"], ["n"], methods)
@@ -104,14 +94,20 @@ function estimate_all_risks()
         end
     end
     # Write the data to csv files
+    try
+        mkdir(joinpath(@__DIR__, "simulations_data"))
+    catch
+        nothing
+    end
     CSV.write(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), df_pid)
     CSV.write(joinpath(@__DIR__, "simulations_data", "elapsed.csv"), df_elapsed)
     CSV.write(joinpath(@__DIR__, "simulations_data", "num_modes.csv"), df_num_modes)
 end
 
-@time estimate_all_risks()
+#@time estimate_all_risks()
 
-#r = estimate_risk(Xoshiro(1812), Chisq(1.0), 25000, 500; l2=false)
+r = estimate_risk(Xoshiro(1812), Claw(), 600, 200)
+println(r)
 #println(r[1])
 
 #println(isfile(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv")))
