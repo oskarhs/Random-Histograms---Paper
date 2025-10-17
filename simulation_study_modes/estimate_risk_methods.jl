@@ -1,5 +1,4 @@
-using Distributed
-using Random, AutoHist, DataFrames, CSV, ProgressMeter
+using Random, AutoHist, DataFrames, CSV, ProgressMeter, Statistics
 
 include(joinpath(@__DIR__, "loss_functions.jl"))
 include(joinpath(@__DIR__, "R_methods", "hpi.jl"))
@@ -35,6 +34,8 @@ function estimate_risk(rng, d, n, B; progress=true)
     mean_num_modes = Vector{Float64}(undef, num_methods)
     risk_pid = Array{Float64}(undef, num_methods)
     median_elapsed = Vector{Float64}(undef, num_methods)
+    sd_pid = Vector{Float64}(undef, num_methods)
+    sd_elapsed = Vector{Float64}(undef, num_methods)
     loss_pid = Array{Float64}(undef, B, num_methods)
     num_modes = Array{Float64}(undef, B, num_methods)
     elapsed = Matrix{Float64}(undef, B, num_methods)
@@ -66,14 +67,18 @@ function estimate_risk(rng, d, n, B; progress=true)
         risk_pid[j] = mean(loss_pid[:,j])
         median_elapsed[j] = median(elapsed[:,j])
         mean_num_modes[j] = mean(num_modes[:,j])
+        sd_pid[j] = std(loss_pid[:,j])
+        sd_elapsed[j] = std(elapsed[:,j])
     end
-    return risk_pid, median_elapsed, mean_num_modes
+    return risk_pid, median_elapsed, mean_num_modes, sd_pid, sd_elapsed
 end
 
 function estimate_all_risks()
     methods = get_methods()
     test_densities = get_test_distributions()
     rng = Xoshiro(1812)
+
+    println("Estimating risks for $test_densities. This will take a while...")
 
     ns = Int64[200, 600, 2000]
     B = 200
@@ -82,15 +87,19 @@ function estimate_all_risks()
     df_pid = DataFrame([[] for _ = colnms] , colnms)
     df_elapsed = DataFrame([[] for _ = colnms] , colnms)
     df_num_modes = DataFrame([[] for _ = colnms] , colnms)
+    df_sd_pid = DataFrame([[] for _ = colnms] , colnms)
+    df_sd_elapsed = DataFrame([[] for _ = colnms] , colnms)
 
     for j in eachindex(test_densities)
         d = test_densities[j]
         for i in eachindex(ns)
             println("j = $j of $(length(test_densities)), i = $(i) of $(length(ns))")
-            risk_pid, median_elapsed, mean_num_modes = estimate_risk(rng, d, ns[i], B)
+            risk_pid, median_elapsed, mean_num_modes, sd_pid, sd_elapsed = estimate_risk(rng, d, ns[i], B)
             push!(df_pid, vcat(j, ns[i], risk_pid))
             push!(df_elapsed, vcat(j, ns[i], median_elapsed))
             push!(df_num_modes, vcat(j, ns[i], mean_num_modes))
+            push!(df_sd_pid, vcat(j, ns[i], sd_pid))
+            push!(df_sd_elapsed, vcat(j, ns[i], sd_elapsed))
         end
     end
     # Write the data to csv files
@@ -102,12 +111,15 @@ function estimate_all_risks()
     CSV.write(joinpath(@__DIR__, "simulations_data", "pid_risks.csv"), df_pid)
     CSV.write(joinpath(@__DIR__, "simulations_data", "elapsed.csv"), df_elapsed)
     CSV.write(joinpath(@__DIR__, "simulations_data", "num_modes.csv"), df_num_modes)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "sd_pid.csv"), df_sd_pid)
+    CSV.write(joinpath(@__DIR__, "simulations_data", "sd_elapsed.csv"), df_sd_elapsed)
+
 end
 
-#@time estimate_all_risks()
+estimate_all_risks()
 
-r = estimate_risk(Xoshiro(1812), Claw(), 600, 200)
-println(r)
+#r = estimate_risk(Xoshiro(1812), SkewedBimodal(), 800, 200)
+#println(r)
 #println(r[1])
 
 #println(isfile(joinpath(@__DIR__, "simulations_data", "hellinger_risks.csv")))
