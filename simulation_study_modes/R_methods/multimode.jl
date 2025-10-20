@@ -26,9 +26,13 @@ function modetest(x::Vector{Float64}; method::String)
         elapsed = unname(time['elapsed'])
         list(est_modes=est_modes, elapsed=elapsed)
     """
-    tup = rcopy(Tuple{Union{Float64, Vector{Float64}}, Float64}, robj)
+    obj = rcopy(robj)
+    tup = obj[:est_modes], obj[:elapsed]
+
     if typeof(tup[1]) == Float64
         est_modes = Float64[tup[1]]
+    elseif typeof(tup[1]) == Missing
+        est_modes = Missing[missing]
     else
         est_modes = tup[1]
     end

@@ -653,7 +653,7 @@ end
 # Return an array containing the test densities defined above
 function get_test_distributions()
     test_distributions = [
-        Normal(), Uniform(), Chisq(1.0), LogNormal(), Claw(),
+        Normal(), Uniform(), LogNormal(), Claw(),
         SkewedBimodal(), SymTriangularDist(), Harp(), TrimodalUniform()
         ]
     return test_distributions
